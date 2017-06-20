@@ -19,50 +19,65 @@ migbee provides the same advantage as mongobee such as a new approach for adding
 
 ** Add the bintray url library
 
-<repositories>
-    <repository>
-        <id>bintray</id>
-        <name>dependency for migbee</name>
-        <url>http://jcenter.bintray.com</url>
-    </repository>
-</repositories>
+```
+    <repositories>
+        <repository>
+            <id>bintray</id>
+            <name>dependency for migbee</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
+```
 
 ** Add the dependency
+
+```
     <dependency>
       <groupId>com.github.migbee</groupId>
       <artifactId>migbee</artifactId>
       <version>0.1.0</version>
       <type>pom</type>
     </dependency>
+```
 
 * Gradle
 
 ** Add the bintray url library
+
+```
     repositories {
         maven {
             url  "http://jcenter.bintray.com"
         }
     }
+```
 
 ** Add the dependency
+
+```
     compile 'com.github.migbee:migbee:0.1.0'
+```
 
 * Ivy
 
-<dependency org='com.github.migbee' name='migbee' rev='0.1.0'>
-  <artifact name='migbee' ext='pom' ></artifact>
-</dependency>
+```
+    <dependency org='com.github.migbee' name='migbee' rev='0.1.0'>
+      <artifact name='migbee' ext='pom' ></artifact>
+    </dependency>
+```
 
 ### How to use?
 
 You need to extends the abstract class AbstractMigrationService and override the methods :
 
 * getChangeLogBasePackageName : return the package where to find the migration (changeLog) classes
+
 ```
 return "com.github.migbee.example.changes"
 ```
 
 * putChangeEntry : create / update in your database the changeEntry
+
 ```
     // below we use MigrationCRUDService injected in the constructor with com.google.inject.Injector
     try {
@@ -73,6 +88,7 @@ return "com.github.migbee.example.changes"
 ```
 
 * isMigrationAlreadyDone : verify if the migration is already done
+
 ```
     // below we use MigrationCRUDService injected in the constructor with com.google.inject.Injector
     try {
@@ -82,7 +98,8 @@ return "com.github.migbee.example.changes"
     }
 ```
 
-* getInstance : create a new instance corresponding on the migration class (changeLog).
+* getInstance : create a new instance corresponding on the migration class (changeLog)
+
 ```
     // below we use com.google.inject.Injector initialized in the constructor
     return this.injector.getInstance(changelogClass);
