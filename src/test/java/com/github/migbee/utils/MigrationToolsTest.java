@@ -78,19 +78,6 @@ public class MigrationToolsTest {
 	}
 
 	@Test
-	public void isAlwaysRunShouldBeFalse () throws NoSuchMethodException {
-		boolean actual = MigrationTools.isRunAlwaysChangeSet(ChangeSetComparatorTest.ChangeLogResourceV1.class.getDeclaredMethod("changeSet1"));
-		assertFalse(actual);
-	}
-
-	@Test
-	public void isAlwaysRunShouldBeTrue () throws NoSuchMethodException {
-		boolean actual = MigrationTools.isRunAlwaysChangeSet(ChangeLogResourceWithOther.class.getDeclaredMethod("changeSet1"));
-		assertTrue(actual);
-	}
-
-
-	@Test
 	public void isAnnotationPresentShouldBeFalse () throws NoSuchMethodException {
 		boolean actual = MigrationTools.isAnnotationPresent(ChangeLogResourceWithOther.class.getDeclaredMethod("changeSet1"), ChangeLog.class);
 		assertFalse(actual);

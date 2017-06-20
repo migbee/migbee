@@ -3,7 +3,6 @@ package com.github.migbee.service;
 import com.github.migbee.annotation.ChangeLog;
 import com.github.migbee.annotation.ChangeSet;
 import com.github.migbee.exceptions.DBMigrationServiceException;
-import com.github.migbee.interfaces.IChangeEntry;
 import com.github.migbee.service.AbstractMigrationServiceResource.ChangeLogResource1;
 import com.github.migbee.service.AbstractMigrationServiceResource.ChangeLogResource2;
 import com.github.migbee.utils.ChangeSetComparatorTest;
@@ -19,12 +18,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
@@ -36,9 +35,6 @@ public class AbstractMigrationServiceTest {
 
 	@Mock
 	AbstractMigrationService tested;
-
-	@Mock
-	IChangeEntry changeEntry;
 
 	ChangeLogResource1 resource1;
 	ChangeLogResource2 resource2;
@@ -57,7 +53,6 @@ public class AbstractMigrationServiceTest {
 		Mockito.doCallRealMethod().when(tested).executeMigration();
 		resource1 = new AbstractMigrationServiceResource().new ChangeLogResource1();
 		resource2 = new AbstractMigrationServiceResource().new ChangeLogResource2();
-		Mockito.when(tested.createChangeEntry(any(), any(), any(), any(), any(), any(), anyBoolean())).thenReturn(changeEntry);
 		fakeMethod = ChangeSetComparatorTest.ChangeLogResourceV1.class.getDeclaredMethod("changeSet1");
 	}
 
@@ -97,7 +92,7 @@ public class AbstractMigrationServiceTest {
 	}
 
 	@Test
-	public void shouldNotCreateChangeEntryIfEmptySet () {
+	public void shouldNotPutChangeEntryIfEmptySet () throws DBMigrationServiceException {
 		Mockito.when(tested.getInstance(any())).thenReturn(resource1);
 		Mockito.when(MigrationTools.fetchChangeLogs(any())).thenReturn(Arrays.asList(ChangeLogResource1.class));
 		Mockito.when(MigrationTools.fetchChangeSets(any())).thenReturn(Arrays.asList());
@@ -105,7 +100,7 @@ public class AbstractMigrationServiceTest {
 		tested.executeMigration();
 		PowerMockito.verifyStatic(Mockito.times(1));
 		MigrationTools.fetchChangeSets(ChangeLogResource1.class);
-		verify(tested, never()).createChangeEntry(any(), any(), any(), any(), any(), any(), anyBoolean());
+		verify(tested, never()).putChangeEntry(any(), any(), any(), any());
 	}
 
 	private void mockCreateChangeEntry () throws NoSuchMethodException {
@@ -118,49 +113,61 @@ public class AbstractMigrationServiceTest {
 	}
 
 	@Test
-	public void shouldCreateChangeEntry () throws NoSuchMethodException {
-		mockCreateChangeEntry();
-
-		tested.executeMigration();
-		verify(tested, times(1)).createChangeEntry(any(), any(), any(), any(), any(), any(), anyBoolean());
-	}
-
-	@Test
 	public void shouldPutChangeEntry () throws NoSuchMethodException, DBMigrationServiceException {
 		mockCreateChangeEntry();
 
 		tested.executeMigration();
-		verify(tested, times(1)).putChangeEntry(changeEntry);
+		verify(tested, times(1)).putChangeEntry(changeLogAnnotation, changeSetAnnotation, ChangeLogResource1.class.getName(), fakeMethod.getName());
 	}
 
 	@Test
 	public void shouldNotExecuteWhenAlreadyDone () throws NoSuchMethodException, DBMigrationServiceException {
 		mockCreateChangeEntry();
-		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(true);
+		Mockito.when(tested.isMigrationAlreadyDone(any(), any(), any(), any())).thenReturn(true);
 
 		tested.executeMigration();
-		verify(tested, never()).putChangeEntry(changeEntry);
+		verify(tested, never()).putChangeEntry(any(), any(), any(), any());
 	}
 
 	@Test
 	public void shouldExecuteWhenNotAlreadyDone () throws NoSuchMethodException, DBMigrationServiceException {
 		mockCreateChangeEntry();
-		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(false);
+		Mockito.when(tested.isMigrationAlreadyDone(any(), any(), any(), any())).thenReturn(false);
 
 		tested.executeMigration();
-		verify(tested, times(1)).putChangeEntry(changeEntry);
+		verify(tested, times(1)).putChangeEntry(changeLogAnnotation, changeSetAnnotation, ChangeLogResource1.class.getName(), fakeMethod.getName());
 	}
 
 	@Test
-	public void shouldExecuteWhenAlwaysExecute () throws NoSuchMethodException, DBMigrationServiceException {
+	public void shouldExecuteWhenAlwaysExecute () throws Exception {
 		mockCreateChangeEntry();
-		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(true);
-		Mockito.when(MigrationTools.isRunAlwaysChangeSet(any())).thenReturn(true);
+		Mockito.when(tested.isMigrationAlreadyDone(any(), any(), any(), any())).thenReturn(true);
+		Mockito.when(changeSetAnnotation.runAlways()).thenReturn(true);
 
 		tested.executeMigration();
 		PowerMockito.verifyStatic(Mockito.times(1));
-		MigrationTools.isRunAlwaysChangeSet(fakeMethod);
-		verify(tested, times(1)).putChangeEntry(changeEntry);
+		MigrationTools.executeChangeSetMethod(fakeMethod, resource1);
+
+	}
+
+	@Test
+	public void shouldNotThrowAnExceptionIfNotCritical () throws Exception {
+		mockCreateChangeEntry();
+		Mockito.when(MigrationTools.executeChangeSetMethod(any(), any())).thenThrow(new IllegalAccessException("Fake exception"));
+
+		tested.executeMigration();
+		verify(tested, never()).putChangeEntry(any(), any(), any(), any());
+
+	}
+
+	@Test(expected = RuntimeException.class)
+	public void shouldThrowAnExceptionIfCritical () throws Exception {
+		mockCreateChangeEntry();
+		Mockito.when(changeSetAnnotation.isCritical()).thenReturn(true);
+		Mockito.when(MigrationTools.executeChangeSetMethod(any(), any())).thenThrow(new IllegalAccessException("Fake exception"));
+
+		tested.executeMigration();
+		verify(tested, never()).putChangeEntry(any(), any(), any(), any());
 
 	}
 

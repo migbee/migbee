@@ -12,6 +12,10 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 
+/**
+ * Utilities to deal with reflections and annotations
+ *
+ */
 public class MigrationTools {
 
 	public static List<Class<?>> fetchChangeLogs(String packageName) {
@@ -45,15 +49,6 @@ public class MigrationTools {
 			}
 		}
 		return changeSetMethods;
-	}
-
-	public static boolean isRunAlwaysChangeSet(Method changeSetMethod) {
-		if (isAnnotationPresent(changeSetMethod, ChangeSet.class)){
-			ChangeSet annotation = getChangeSetAnnotation(changeSetMethod);
-			return annotation.runAlways();
-		} else {
-			return false;
-		}
 	}
 
 	public static boolean isAnnotationPresent(Method method, Class<? extends Annotation> annotation) {

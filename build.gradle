@@ -1,5 +1,6 @@
 group 'com.github.migbee'
-version '0.1.1'
+version '0.1.0'
+def deployVersion = version
 
 apply plugin: 'java'
 apply plugin: 'maven'
@@ -45,7 +46,7 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            groupId 'bintray-fpozzobon-migbee'
+            groupId 'com.github.migbee'
             artifactId 'migbee'
             version version
         }
@@ -55,7 +56,6 @@ publishing {
 bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
-    configurations = ['archives']
     publications = ['mavenJava']
     pkg {
         repo = 'migbee'
@@ -63,7 +63,7 @@ bintray {
         licenses = ['Apache-2.0']
         vcsUrl = 'https://github.com/migbee/migbee.git'
         version {
-            name = version
+            name = deployVersion
             released  = new Date()
         }
     }
