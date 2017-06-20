@@ -64,7 +64,7 @@ public abstract class AbstractMigrationService {
 	 * Should return true if the migration has been already done (ie exist in database)
 	 * @param changeEntry to verify
 	 * @return boolean true if already done
-	 * @throws DBMigrationServiceException
+	 * @throws DBMigrationServiceException to throw if verifying migration already done fails
 	 */
 	protected abstract boolean isMigrationAlreadyDone(IChangeEntry changeEntry) throws DBMigrationServiceException;
 
@@ -72,7 +72,7 @@ public abstract class AbstractMigrationService {
 	 * Create / update the changeEntry in database (in order to retrieve it with isMigrationAlreadyDone later)
 	 * @param changeEntry which we want to insert in database
 	 * @return the created / updated changeEntry
-	 * @throws DBMigrationServiceException
+	 * @throws DBMigrationServiceException to throw if adding the entry fails
 	 */
 	protected abstract IChangeEntry putChangeEntry (IChangeEntry changeEntry) throws DBMigrationServiceException;
 
