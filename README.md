@@ -1,16 +1,12 @@
 ![migbee](https://raw.githubusercontent.com/migbee/migbee/master/misc/migbee_min.png)
 =======
 
-# migbee
-Database migration library
-
-
 ### What for?
 
 migbee is a Java library which can help you to *manage changes* in your DB and *synchronize* them with your application.
 The concept and the code is strongly inspired from [mongobee](http://github.com/mongobee) without the dependencies such as Spring and MongoDb.
 
-The goal is to keep this tool simple and comfortable to use.
+The goal is to keep this library simple and comfortable to use.
 
 ### What's special?
 
