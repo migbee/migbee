@@ -2,6 +2,7 @@ package com.github.migbee.utils;
 
 import com.github.migbee.annotation.ChangeLog;
 import com.github.migbee.annotation.ChangeSet;
+import com.github.migbee.service.ChangeEntry;
 import org.reflections.Reflections;
 import org.reflections.scanners.TypeAnnotationsScanner;
 
@@ -67,6 +68,13 @@ public class MigrationTools {
 			throws IllegalAccessException, InvocationTargetException {
 
 		return changeSetMethod.invoke(instance);
+	}
+
+	public static ChangeEntry createChangeEntry (ChangeLog changeLog, Class<?> changelogClass, ChangeSet changeSet, Method changeSetMethod) {
+		return new ChangeEntry(changeLog,
+				changelogClass,
+				changeSet,
+				changeSetMethod);
 	}
 
 }
