@@ -9,6 +9,7 @@ import com.github.migbee.service.AbstractMigrationServiceResource.ChangeLogResou
 import com.github.migbee.utils.ChangeSetComparatorTest;
 import com.github.migbee.utils.MigrationTools;
 import com.github.migbee.utils.MigrationToolsTest;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +23,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -121,6 +124,7 @@ public class AbstractMigrationServiceTest {
 		mockCreateChangeEntry();
 
 		tested.executeMigration();
+
 		PowerMockito.verifyStatic(Mockito.times(1));
 		MigrationTools.createChangeEntry(changeLogAnnotation, ChangeLogResource1.class, changeSetAnnotation, fakeMethod);
 		verify(tested, times(1)).putChangeEntry(changeEntry);
@@ -132,10 +136,12 @@ public class AbstractMigrationServiceTest {
 		mockCreateChangeEntry();
 		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(true);
 
-		tested.executeMigration();
+		List actual = tested.executeMigration();
+
 		PowerMockito.verifyStatic(never());
 		MigrationTools.executeChangeSetMethod(fakeMethod, resource1);
 		verify(tested, never()).putChangeEntry(any());
+		Assert.assertTrue(actual.isEmpty());
 	}
 
 	@Test
@@ -143,10 +149,12 @@ public class AbstractMigrationServiceTest {
 		mockCreateChangeEntry();
 		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(false);
 
-		tested.executeMigration();
+		List actual = tested.executeMigration();
+
 		PowerMockito.verifyStatic(Mockito.times(1));
 		MigrationTools.executeChangeSetMethod(fakeMethod, resource1);
 		verify(tested, times(1)).putChangeEntry(changeEntry);
+		Assert.assertTrue(actual.isEmpty());
 	}
 
 	@Test
@@ -155,10 +163,12 @@ public class AbstractMigrationServiceTest {
 		Mockito.when(tested.isMigrationAlreadyDone(any())).thenReturn(true);
 		Mockito.when(changeSetAnnotation.runAlways()).thenReturn(true);
 
-		tested.executeMigration();
+		List actual = tested.executeMigration();
+
 		PowerMockito.verifyStatic(Mockito.times(1));
 		MigrationTools.executeChangeSetMethod(fakeMethod, resource1);
 		verify(tested, times(1)).putChangeEntry(changeEntry);
+		Assert.assertTrue(actual.isEmpty());
 
 	}
 
@@ -167,9 +177,10 @@ public class AbstractMigrationServiceTest {
 		mockCreateChangeEntry();
 		Mockito.when(MigrationTools.executeChangeSetMethod(any(), any())).thenThrow(new IllegalAccessException("Fake exception"));
 
-		tested.executeMigration();
+		List actual = tested.executeMigration();
 		verify(tested, never()).putChangeEntry(any());
-
+		Assert.assertFalse(actual.isEmpty());
+		assertEquals(actual.get(0), changeEntry);
 	}
 
 	@Test(expected = CriticalMigrationFailedException.class)
