@@ -86,18 +86,6 @@ public class AbstractMigrationServiceTest {
 	}
 
 	@Test
-	public void shouldGetInstance () {
-		Mockito.when(tested.getInstance(any())).thenReturn(resource1);
-		Mockito.when(MigrationTools.fetchChangeLogs(any())).thenReturn(
-				Arrays.asList(ChangeLogResource1.class, ChangeLogResource2.class));
-
-		tested.executeMigration();
-		verify(tested, times(2)).getInstance(any());
-		verify(tested, times(1)).getInstance(AbstractMigrationServiceResource.ChangeLogResource1.class);
-		verify(tested, times(1)).getInstance(AbstractMigrationServiceResource.ChangeLogResource2.class);
-	}
-
-	@Test
 	public void shouldNotPutChangeEntryIfEmptySet () throws DBMigrationServiceException {
 		Mockito.when(tested.getInstance(any())).thenReturn(resource1);
 		Mockito.when(MigrationTools.fetchChangeLogs(any())).thenReturn(Arrays.asList(ChangeLogResource1.class));
@@ -120,7 +108,19 @@ public class AbstractMigrationServiceTest {
 	}
 
 	@Test
-	public void shouldPutChangeEntry () throws NoSuchMethodException, DBMigrationServiceException {
+	public void shouldGetInstance () throws Exception {
+		mockCreateChangeEntry();
+		Mockito.when(MigrationTools.fetchChangeLogs(any())).thenReturn(
+				Arrays.asList(ChangeLogResource1.class, ChangeLogResource2.class));
+
+		tested.executeMigration();
+		verify(tested, times(2)).getInstance(any());
+		verify(tested, times(1)).getInstance(AbstractMigrationServiceResource.ChangeLogResource1.class);
+		verify(tested, times(1)).getInstance(AbstractMigrationServiceResource.ChangeLogResource2.class);
+	}
+
+	@Test
+	public void shouldPutChangeEntry () throws Exception {
 		mockCreateChangeEntry();
 
 		tested.executeMigration();

@@ -29,8 +29,7 @@ public abstract class AbstractMigrationService {
 		List<ChangeEntry> failedMigrations = new ArrayList<>();
 		for (Class<?> changelogClass : MigrationTools.fetchChangeLogs(this.getChangeLogBasePackageName())) {
 
-			Object changelogInstance = this.getInstance(changelogClass);
-			List<Method> changeSetMethods = MigrationTools.fetchChangeSets(changelogInstance.getClass());
+			List<Method> changeSetMethods = MigrationTools.fetchChangeSets(changelogClass);
 
 			for (Method changeSetMethod : changeSetMethods) {
 
@@ -45,6 +44,7 @@ public abstract class AbstractMigrationService {
 				try {
 					if (!this.isMigrationAlreadyDone(changeEntry)
 							|| changeSetAnnotation.runAlways() ) {
+						Object changelogInstance = this.getInstance(changelogClass);
 						MigrationTools.executeChangeSetMethod(changeSetMethod, changelogInstance);
 						logger.info("Migration " + changeSetAnnotation.name() + " done");
 						this.putChangeEntry(changeEntry);
