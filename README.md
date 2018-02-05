@@ -14,6 +14,8 @@ migbee provides the same advantage as mongobee such as a new approach for adding
 
 ### Adding maven dependency
 
+Library available on https://bintray.com/fpozzobon/migbee/migbee
+
 * Maven
 
 
